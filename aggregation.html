@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Manager - Aggregation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 15px;
+        }
+
+        .navbar a:hover {
+            background-color: #575757;
+            border-radius: 5px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Music Manager - Aggregation</h1>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="/" id="homeBtn">Add/Edit/Delete</a>
+        <a href="/reports" id="reportsBtn">Reports</a>
+        <a href="/aggregation" id="aggregationBtn">Aggregation</a>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <h2>Bands Per Country</h2>
+            <ul>
+                {% for country, count in bands_per_country %}
+                    <li>{{ country or "Unknown" }}: {{ count }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Albums Per Band</h2>
+            <ul>
+                {% for band_name, count in albums_per_band %}
+                    <li>{{ band_name }}: {{ count }} album(s)</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
