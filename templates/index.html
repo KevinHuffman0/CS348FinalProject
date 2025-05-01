@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            margin: 0;
+            text-align: center;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 20px;
+        }
+
+        form {
+            background: white;
+            padding: 15px;
+            margin: 10px auto;
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input {
+            width: 90%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="number"] {
+            width: 60px; /* Smaller width for Band ID */
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: white;
+            margin: 10px auto;
+            padding: 10px;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .edit-btn {
+            background-color: #007bff;
+        }
+
+        .edit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* CSS Grid Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            gap: 30px; /* Space between sections */
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Title spacing */
+        .section h3 {
+            margin-top: 0;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 15px;
+        }
+
+        .navbar a:hover {
+            background-color: #575757;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Music Manager</h1>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="/" id="homeBtn">Add/Edit/Delete</a>
+        <a href="/reports" id="reportsBtn">Reports</a>
+        <a href="/aggregation" id="aggregationBtn">Aggregation</a>
+    </div>
+
+
+    <!-- Main Container with Grid Layout -->
+    <div class="container">
+        <!-- Bands Section -->
+        <div class="section" id="bandsSection">
+            <h2>Bands</h2>
+
+            <!-- Add a Band Form -->
+            <h3>Add a Band</h3>
+            <form id="addBandForm">
+                <label for="bandName">Band Name:</label>
+                <input type="text" id="bandName" required>
+                <label for="country">Country:</label>
+                <input type="text" id="country" required>
+                <button type="submit">Add Band</button>
+            </form>
+
+            <!-- List of All Bands -->
+            <h3>All Bands</h3>
+            <ul id="bandList"></ul>
+        </div>
+
+        <!-- Albums Section -->
+        <div class="section" id="albumsSection">
+            <h2>Albums</h2>
+
+            <!-- Add an Album Form -->
+            <h3>Add an Album</h3>
+            <form id="addAlbumForm">
+                <label for="title">Album Name:</label>
+                <input type="text" id="title" required>
+                <label for="releaseYear">Release Year:</label>
+                <input type="number" id="releaseYear" required>
+                <label for="bandId">Band ID:</label>
+                <input type="number" id="bandId" required>
+                <button type="submit">Add Album</button>
+            </form>
+
+            <!-- List of All Albums -->
+            <h3>All Albums</h3>
+            <ul id="albumList"></ul>
+        </div>
+    </div>
+
+    <script>
+        function fetchBands() {
+            fetch("/bands")
+                .then(response => response.json())
+                .then(data => {
+                    let bandList = document.getElementById("bandList");
+                    bandList.innerHTML = "";
+                    data.forEach(band => {
+                        let li = document.createElement("li");
+                        li.innerHTML = `ID: ${band.id} - ${band.name} - ${band.country}
+                            <span class="buttons">
+                                <button class="edit-btn" onclick="editBand(${band.id})">Edit</button>
+                                <button class="delete-btn" onclick="deleteBand(${band.id})">Delete</button>
+                            </span>`;
+                        bandList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error fetching bands:', error));
+        }
+
+        document.getElementById("addBandForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let name = document.getElementById("bandName").value;
+            let country = document.getElementById("country").value;
+
+            fetch("/add_band", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, country })
+            }).then(() => fetchBands());
+        });
+
+        function deleteBand(band_id) {
+            fetch(`/delete_band/${band_id}`, { method: "DELETE" })
+                .then(() => {
+                    fetchBands();
+                    fetchAlbums(); // Refresh albums to remove those linked to the deleted band
+                });
+        }
+
+        function editBand(band_id) {
+            let newName = prompt("Enter new band name:");
+            let newCountry = prompt("Enter new country:");
+            if (newName && newCountry) {
+                fetch(`/edit_band/${band_id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: newName, country: newCountry })
+                }).then(() => fetchBands());
+            }
+        }
+
+        fetchBands();
+
+        function fetchAlbums() {
+            fetch("/albums")
+                .then(response => response.json())
+                .then(data => {
+                    let albumList = document.getElementById("albumList");
+                    albumList.innerHTML = "";
+                    data.forEach(album => {
+                        let li = document.createElement("li");
+                        li.innerHTML = `${album.title} (${album.release_year}) - Band ID: ${album.band_id}
+                            <span class="buttons">
+                                <button class="edit-btn" onclick="editAlbum(${album.id})">Edit</button>
+                                <button class="delete-btn" onclick="deleteAlbum(${album.id})">Delete</button>
+                            </span>`;
+                        albumList.appendChild(li);
+                    });
+                });
+        }
+
+        document.getElementById("addAlbumForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let title = document.getElementById("title").value;
+            let releaseYear = document.getElementById("releaseYear").value;
+            let bandId = document.getElementById("bandId").value;
+
+            fetch("/add_album", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, release_year: releaseYear, band_id: bandId })
+            }).then(() => fetchAlbums());
+        });
+
+        function deleteAlbum(album_id) {
+            fetch(`/delete_album/${album_id}`, { method: "DELETE" })
+                .then(() => fetchAlbums());
+        }
+
+        function editAlbum(album_id) {
+            let newTitle = prompt("Enter new album name:");
+            let newReleaseYear = prompt("Enter new release year:");
+            let newBandId = prompt("Enter new band ID:");
+            if (newTitle && newReleaseYear && newBandId) {
+                fetch(`/edit_album/${album_id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title: newTitle, release_year: newReleaseYear, band_id: newBandId })
+                }).then(() => fetchAlbums());
+            }
+        }
+
+        fetchAlbums();
+    </script>
+</body>
+</html>
